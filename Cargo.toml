@@ -22,8 +22,8 @@ approx = {version = "0.5.1"} # approx test for floats
 defmt-test = "0.3.2"
 
 # for the library crate (src/lib.rs)
-[lib]
-harness = false
+# [lib]
+# harness = false
 
 [dependencies.cortex-m]
 version = "0.7"
@@ -31,5 +31,5 @@ features = ["critical-section-single-core"]
 
 [dependencies.stm32f4xx-hal]
 version = "0.20.0"
-#features = ["stm32f446"]
-features = ["stm32f401"]
+features = ["stm32f446"]
+# features = ["stm32f401"]
