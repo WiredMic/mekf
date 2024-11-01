@@ -1,0 +1,28 @@
+#+title: Readme
+
+* Multiplicative Extended Kalman Filter
+
+This is an implementation of the mekf for use in [[http://satlab.aau.dk/][AAU SATLAB's]] 6th cube sat.
+The implementation is written in rust and uses geometric algebra as a backend for doing rotaions.
+For now, it is running on a stm32f446 microcontroller.
+
+* Use
+To run this code ether clone this repo and with a locally installed version of rust.
+
+** Recommend use
+Run with the nix package manager using [[https://nixos.wiki/wiki/Flakes][flakes]] and [[https://github.com/nix-community/nix-direnv][direnv]].
+
+*** Linux
+Use the [[https://nixos.org/download/][guide]] on nixos.org.
+*** Windows
+Use [[https://learn.microsoft.com/en-us/windows/wsl/install][WSL2]] and what ever distro. When use the [[https://nixos.org/download/][guide]] on nixos.org.
+
+* TODO
+Add types using GaMultivector as backend.
+- Vectors
+- Bivectors
+- Rotors
+
+Add different rotation tests
+
+Add the mekf
