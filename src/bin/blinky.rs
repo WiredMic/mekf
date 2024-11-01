@@ -23,7 +23,7 @@ use cortex_m_rt::entry;
 use libm::powf;
 use nalgebra as na;
 
-// use blinky::geometric_algebra;
+use blinky::geometric_algebra;
 // use blinky::quarterions;
 
 #[entry] //Intro point of program
