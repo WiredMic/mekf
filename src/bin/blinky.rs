@@ -5,7 +5,6 @@
 #![no_main]
 #![no_std]
 
-// use blinky::geometric_algebra::ga_rotation;
 //Setup serial
 use defmt as _;
 use defmt_brtt as _;
@@ -23,8 +22,12 @@ use cortex_m_rt::entry;
 use libm::powf;
 use nalgebra as na;
 
-use blinky::geometric_algebra;
-// use blinky::quarterions;
+use blinky::geometric_algebra::geometric_algebra_bivector::GaBivector;
+use blinky::geometric_algebra::geometric_algebra_multivector::GaMultivector;
+use blinky::geometric_algebra::geometric_algebra_rotor::GaRotor;
+use blinky::geometric_algebra::geometric_algebra_vector::GaVector;
+use blinky::geometric_algebra::rotations::ga_rotation;
+use core::f32::consts::PI;
 
 #[entry] //Intro point of program
 fn main() -> ! {
@@ -49,48 +52,25 @@ fn main() -> ! {
     // i2c
     // hal::i2c::
 
+    let mut vector = GaVector::new(3.0, 0.0, 0.0);
+
+    let angle: f32 = PI / 2.0;
+    let bivector = GaBivector::new(1.0, 0.0, 0.0);
+    let rotor = GaRotor::new(angle, bivector);
+
     defmt::debug!("Starting blink sequence!");
     loop {
-        defmt::info!("Led on:");
+        // defmt::info!("Led on:");
         led.set_high();
-        _delay.delay_ms(250);
+        // _delay.delay_ms(250);
 
-        defmt::info!("Led off");
-        led.set_low();
-        _delay.delay_ms(250);
-    }
+        // defmt::info!("Led off");
+        // led.set_low();
+        // _delay.delay_ms(250);
 
-    // All of this notation is writen with matrix algebra
-    //
-    // Skew symmetric matrix
-    // \[ [ \vec{x} \times ] = \begin{bmatrix} 0 & -x_3 & x_2\\ x_3 & 0 & -x_1 \\ -x_2 & x_1 & 0 \end{bmatrix} \]
-
-    // Zero vector
-    // \[ \vec{0}_{3\times 1} = \begin{bmatrix} 0\\ 0\\ 0\\ \end{bmatrix}\]
-
-    fn update_step() {
-        // \[\vec{a}_{k+1|k}=\vec{0}_{3\times 1}\]
-        let v_a = na::Vector3::from_element(0.0);
-        assert!(v_a.x == 0.0 && v_a.y == 0.0 && v_a.z == 0.0);
-
-        // \[\hat{\omega}_{k+1|k}=\hat{\omega}_{m,k+1}\]
-
-        // \[P_{a,k+1|k}=[\hat{\omega}_{k+1|k}\times]P_{a,k|k}[\hat{\omega}_{k+1|k}\times]^T+\Delta t Q_{k+1}\]
-        // \[\boldsymbol{q}_{k+1|k}=\boldsymbol{q}_{k|k}+\Delta t \frac{1}{2}\boldsymbol{q}_{k|k}\otimes\hat{\omega}_{k+1|k}\]
-        // \[\boldsymbol{q}_{k+1|k}=\frac{\boldsymbol{q}_{k+1|k}}{||\boldsymbol{q}_{k+1|k}||}\]
-    }
-
-    fn measurement_step() {
-        // \[ A(\boldsymbol{q}_{k+1|k})=I_{3\times 3} \hat{q}_4^2 -2 \hat{q}_4 [\vec{q}\times] + [\vec{q}\times]^2 + \vec{q}\,\vec{q}^{\,T} \]
-        // \[h_{k+1|k}=A(\boldsymbol{q}_{k+1|k})^i \vec{z}_{i,m,k+1}\]
-        // \[ ^i \vec{y}_{k+1|k}=^i \vec{z}_{z,m,k+1}-h_{k+1|k}\]
-        // \[ P_{y,k+1|k}=[h_{k+1|k}\times]P_{a,k+1|k}H^{T}_{a,k+1}P^{-1}_{y,k+1|k}\]
-        // \[\vec{a}_{k+1|k+1}=K_{k+1}\vec{y}_{k+1|k}\]
-    }
-
-    fn reset_step() {
-        // \[\delta \boldsymbol{q}_{k+1|k+1} = \left[  \frac{\frac{1}{2}\vec{a}_{k+1|k+1}}{\sqrt{1-\frac{1}{4}\left|\vec{a}_{k+1|k+1}\right|^2}} \right]\]
-        // \[\boldsymbol{q}_{k+1|k+1} = \boldsymbol{q}_{k+1|k}\otimes \delta \boldsymbol{q}_{k+1|k+1}\]
-        // \[\hat{\omega}_{k+1|k+1} = \hat{\omega}_{k+1|k} + K_{k+1}\vec{y}_{k+1|k}\]
+        defmt::info!("The input vector is {}", vector);
+        let vector_rot = ga_rotation(rotor, vector);
+        defmt::info!("The rotated vector is {}", vector_rot);
+        vector = vector_rot;
     }
 }

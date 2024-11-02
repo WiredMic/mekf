@@ -28,7 +28,6 @@ impl GaRotor {
         let mut res = Self::zero();
 
         let bivector_norm = bivector.Norm();
-
         res[0] = cosf(angle_radians / 2.0);
         res[4] = sinf(angle_radians / 2.0) * bivector[4] / bivector_norm;
         res[5] = sinf(angle_radians / 2.0) * bivector[5] / bivector_norm;
@@ -36,7 +35,7 @@ impl GaRotor {
         res
     }
 
-    pub fn new_vectors(angle_radians: f32, vector1: GaVector, vector2: GaVector) -> Self {
+    pub fn new_from_vectors(angle_radians: f32, vector1: GaVector, vector2: GaVector) -> Self {
         let mut res = Self::zero();
         let bivector = vector1 ^ vector2;
         let bivector_norm = bivector.Norm();
@@ -47,6 +46,61 @@ impl GaRotor {
         res[6] = sinf(angle_radians / 2.0) * bivector[6] / bivector_norm;
         res
     }
+
+    // rotor from unit basis
+    pub fn new_from_unit_basis(scalar: f32, e1e2: f32, e1e3: f32, e2e3: f32) -> GaRotor {
+        let mut res = Self::zero();
+        res[0] = scalar;
+        res[4] = e1e2;
+        res[5] = e1e3;
+        res[6] = e2e3;
+        res * (1.0 / res.Norm())
+    }
+
+    // quarterions are isomophic to the even sub algebra of G3
+    // \[\mathrm{i} \to \mathrm{e}_3\mathrm{e}_2 = -\mathrm{e}_2\mathrm{e}_3\]
+    // \[\mathrm{j} \to \mathrm{e}_1\mathrm{e}_3 \]
+    // \[\mathrm{k} \to \mathrm{e}_2\mathrm{e}_1 = -\mathrm{e}_1\mathrm{e}_2\]
+    // While rotores defined with the duel of the unit vectors follow the right hand rule
+    // Rotate with R* v R
+    // Quarterions diffined in this form follow the left hand rule
+    // Rotate with R v R*
+    pub fn new_unit_quaterion(scalar: f32, i: f32, j: f32, k: f32) -> GaRotor {
+        GaRotor::new_from_unit_basis(scalar, -k, j, -i)
+    }
+
+    pub fn new_quaterion_from_angle_and_n(angle_radians: f32, i: f32, j: f32, k: f32) -> GaRotor {
+        let bivector = GaBivector::new(-k, j, -i);
+        GaRotor::new(angle_radians, bivector)
+    }
+}
+
+#[cfg(test)]
+mod rotor_init {
+    use core::f32::consts::PI;
+
+    use super::*;
+    use approx::assert_relative_eq;
+    #[test]
+    fn quaterion_rotor_mul() {
+        angle = PI / 2;
+        // define a quaterion wiith rotation axes
+
+        // define a roter that does the same thing
+
+        // test if they do the same thing
+
+        assert_relative_eq!(bivector[0], -7.0, max_relative = 0.000001);
+        assert_relative_eq!(bivector[4], -7.0, max_relative = 0.000001);
+        assert_relative_eq!(bivector[5], 10.0, max_relative = 0.000001);
+        assert_relative_eq!(bivector[6], 26.0, max_relative = 0.000001);
+    }
+
+    // #[test]
+    // fn vector_mvec_wedge() {}
+
+    // #[test]
+    // fn mvec_vector_wedge() {}
 }
 
 impl Index<usize> for GaRotor {

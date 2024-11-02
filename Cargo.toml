@@ -17,11 +17,10 @@ mpu9250 = {version = "0.25.0"}
 libm = {version = "0.2.11"} # math lib for embedded
 approx = {version = "0.5.1"} # approx test for floats
 
-
 [dev-dependencies]
 defmt-test = "0.3.2"
 
-for the library crate (src/lib.rs)
+# for the library crate (src/lib.rs)
 [lib]
 harness = false
 

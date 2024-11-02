@@ -23,11 +23,11 @@ impl GaBivector {
         }
     }
 
-    pub fn new(b1: f32, b2: f32, b3: f32) -> Self {
+    pub fn new(e1e2: f32, e1e3: f32, e2e3: f32) -> Self {
         let mut ret = Self::zero();
-        ret.mvec[4] = b1;
-        ret.mvec[5] = b2;
-        ret.mvec[6] = b3;
+        ret.mvec[4] = e1e2;
+        ret.mvec[5] = e1e3;
+        ret.mvec[6] = e2e3;
         ret
     }
 

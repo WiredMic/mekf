@@ -10,14 +10,15 @@
 
 use core::ops::{Add, BitAnd, BitOr, BitXor, Div, Index, IndexMut, Mul, Not, Sub};
 use libm::{cosf, powf, sinf, sqrtf};
-
+extern crate defmt;
 use core::f32::consts::PI;
+use defmt::Format;
 
 // the 8 bases of 3D vectorspace geometric algebra
 const basis: &'static [&'static str] = &["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"];
 pub const basis_count: usize = basis.len();
 
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Format)]
 pub struct GaMultivector {
     mvec: [f32; basis_count],
 }
@@ -441,17 +442,5 @@ impl GaMultivector {
         // TODO test if self is the zero multivector
         let a = self;
         a.Reverse() * (1.0 / (a.Reverse() * a)[0])
-    }
-}
-
-// new ga vector type
-
-impl GaMultivector {
-    pub fn new_bivector(b1: f32, b2: f32, b3: f32) -> GaMultivector {
-        let mut res = GaMultivector::zero();
-        res[4] = b1;
-        res[5] = b2;
-        res[6] = b3;
-        res
     }
 }

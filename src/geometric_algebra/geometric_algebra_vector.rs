@@ -5,13 +5,15 @@
 // #![feature(const_slice_len)]
 
 use core::ops::{Add, BitAnd, BitOr, BitXor, Div, Index, IndexMut, Mul, Not, Sub};
+extern crate defmt;
+use defmt::Format;
 use libm::{cosf, powf, sinf, sqrtf};
 
 use super::geometric_algebra_bivector::GaBivector;
 use super::geometric_algebra_multivector::basis_count;
 use super::geometric_algebra_multivector::GaMultivector;
 
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Format)]
 pub struct GaVector {
     pub mvec: GaMultivector,
 }
@@ -23,11 +25,11 @@ impl GaVector {
         }
     }
 
-    pub fn new(v1: f32, v2: f32, v3: f32) -> Self {
+    pub fn new(e1: f32, e2: f32, e3: f32) -> Self {
         let mut ret = Self::zero();
-        ret.mvec[1] = v1;
-        ret.mvec[2] = v2;
-        ret.mvec[3] = v3;
+        ret.mvec[1] = e1;
+        ret.mvec[2] = e2;
+        ret.mvec[3] = e3;
         ret
     }
 }
@@ -45,6 +47,47 @@ impl IndexMut<usize> for GaVector {
         &mut self.mvec[index]
     }
 }
+
+// impl defmt::Format for GaVector {
+//     fn format(&self, fmt: defmt::Formatter) -> defmt::Result {
+//         let t = internp!("{=f32}");
+//         defmt::export::istr(&t);
+//         defmt::export::GaVector(self)
+//         // on the wire: [1, 42]
+//         //  string index ^  ^^ `self`
+//     }
+// }
+
+// impl fmt::Display for GaVector {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         let mut n = 0;
+//         let ret = self
+//             .mvec
+//             .iter()
+//             .enumerate()
+//             .filter_map(|(i, &coeff)| {
+//                 if coeff > 0.00001 || coeff < -0.00001 {
+//                     n = 1;
+//                     Some(format!(
+//                         "{}{}",
+//                         format!("{:.*}", 7, coeff)
+//                             .trim_end_matches('0')
+//                             .trim_end_matches('.'),
+//                         if i > 0 { basis[i] } else { "" }
+//                     ))
+//                 } else {
+//                     None
+//                 }
+//             })
+//             .collect::<Vec<String>>()
+//             .join(" + ");
+//         if n == 0 {
+//             write!(f, "0")
+//         } else {
+//             write!(f, "{}", ret)
+//         }
+//     }
+// }
 
 // Reverse
 // \[ \vec{v}^\dag\]

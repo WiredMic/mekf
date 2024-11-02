@@ -1,10 +1,10 @@
 #![allow(dead_code)]
-
+#![allow(unused_imports)]
 // This is an implemention of 3D vectorspace geometric algebra
-mod geometric_algebra_bivector;
-mod geometric_algebra_multivector;
-mod geometric_algebra_rotor;
-mod geometric_algebra_vector;
+pub mod geometric_algebra_bivector;
+pub mod geometric_algebra_multivector;
+pub mod geometric_algebra_rotor;
+pub mod geometric_algebra_vector;
 
 pub mod rotations {
     use super::geometric_algebra_multivector::GaMultivector;
@@ -13,11 +13,14 @@ pub mod rotations {
 
     // \[ R^\dag \vec{v} R \]
     // A rotation in g3 is a sandwitch product of a rotor ( R ) and a vector ( v )
-    pub fn ga_rotation(rotor: GaRotor, vector: GaVector) -> GaMultivector {
+    pub fn ga_rotation(rotor: GaRotor, vector: GaVector) -> GaVector {
         // normilise roter
         let rotor = rotor * (1.0 / rotor.Norm());
+        let norm = vector.Norm();
 
-        rotor.Reverse() * vector * rotor
+        super::geometric_algebra_vector::GaVector {
+            mvec: (rotor.Reverse() * vector * rotor) * (1.0 / norm) * norm,
+        }
     }
 
     #[cfg(test)]
