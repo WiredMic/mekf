@@ -15,9 +15,9 @@ Run with the nix package manager using [[https://nixos.wiki/wiki/Flakes][flakes]
 *** Linux
 Use the [[https://nixos.org/download/][guide]] on nixos.org.
 *** Windows
-Use [[https://learn.microsoft.com/en-us/windows/wsl/install][WSL2]] and what ever distro. When use the [[https://nixos.org/download/][guide]] on nixos.org.
+Use [[https://learn.microsoft.com/en-us/windows/wsl/install][WSL2]] and what ever distro. Then use the [[https://nixos.org/download/][guide]] on nixos.org.
 
-* TODO
+* Backlog
 Add types using GaMultivector as backend.
 - Rotors
   - All interaction with all of the other types
