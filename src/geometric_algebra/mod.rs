@@ -1,13 +1,19 @@
 #![allow(dead_code)]
 
 // This is an implemention of 3D vectorspace geometric algebra
-mod geometric_algrbra_multivector;
+mod geometric_algebra_bivector;
+mod geometric_algebra_multivector;
+mod geometric_algebra_rotor;
+mod geometric_algebra_vector;
 
 pub mod rotations {
-    use super::geometric_algrbra_multivector::GaMultivector;
+    use super::geometric_algebra_multivector::GaMultivector;
+    use super::geometric_algebra_rotor::GaRotor;
+    use super::geometric_algebra_vector::GaVector;
+
     // \[ R^\dag \vec{v} R \]
     // A rotation in g3 is a sandwitch product of a rotor ( R ) and a vector ( v )
-    pub fn ga_rotation(rotor: GaMultivector, vector: GaMultivector) -> GaMultivector {
+    pub fn ga_rotation(rotor: GaRotor, vector: GaVector) -> GaMultivector {
         // normilise roter
         let rotor = rotor * (1.0 / rotor.Norm());
 
@@ -17,25 +23,27 @@ pub mod rotations {
     #[cfg(test)]
     mod ga_rotation_tests {
 
-        use super::GaMultivector;
-        use crate::geometric_algebra::rotations::ga_rotation;
+        use crate::geometric_algebra::geometric_algebra_bivector::GaBivector;
+
+        use super::*;
         use approx::assert_relative_eq;
         use core::f32::consts::PI;
 
         #[test]
         fn rotor() {
             let angle: f32 = PI / 2.0;
-            let rotor = GaMultivector::new_rotor(angle, 1.0, 0.0, 0.0);
-
+            let bivector = GaBivector::new(1.0, 0.0, 0.0);
+            let rotor = GaRotor::new(angle, bivector);
             assert_relative_eq!(rotor[0], 0.7071067, max_relative = 0.000001);
             assert_relative_eq!(rotor[4], 0.7071067, max_relative = 0.000001);
         }
 
         #[test]
         fn vec_rot_quarter_e1e2() {
-            let vector = GaMultivector::new_vector(3.0, 0.0, 0.0);
+            let vector = GaVector::new(3.0, 0.0, 0.0);
             let angle: f32 = PI / 2.0;
-            let rotor = GaMultivector::new_rotor(angle, 1.0, 0.0, 0.0);
+            let bivector = GaBivector::new(1.0, 0.0, 0.0);
+            let rotor = GaRotor::new(angle, bivector);
             let vector_rot = ga_rotation(rotor, vector);
 
             assert_relative_eq!(vector_rot[1], 0.0, max_relative = 0.000001);

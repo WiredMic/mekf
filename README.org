@@ -19,9 +19,10 @@ Use [[https://learn.microsoft.com/en-us/windows/wsl/install][WSL2]] and what eve
 
 * TODO
 Add types using GaMultivector as backend.
-- Vectors
-- Bivectors
 - Rotors
+  - All interaction with all of the other types
+  - Different ways to make a rotor
+
 
 Add different rotation tests
 

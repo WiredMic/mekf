@@ -21,9 +21,9 @@ approx = {version = "0.5.1"} # approx test for floats
 [dev-dependencies]
 defmt-test = "0.3.2"
 
-# for the library crate (src/lib.rs)
-# [lib]
-# harness = false
+for the library crate (src/lib.rs)
+[lib]
+harness = false
 
 [dependencies.cortex-m]
 version = "0.7"

@@ -11,12 +11,11 @@
 use core::ops::{Add, BitAnd, BitOr, BitXor, Div, Index, IndexMut, Mul, Not, Sub};
 use libm::{cosf, powf, sinf, sqrtf};
 
-// use std::f32::consts::PI;
-const PI: f32 = 3.14159265358979323846;
+use core::f32::consts::PI;
 
 // the 8 bases of 3D vectorspace geometric algebra
 const basis: &'static [&'static str] = &["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"];
-const basis_count: usize = basis.len();
+pub const basis_count: usize = basis.len();
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct GaMultivector {
@@ -192,26 +191,6 @@ impl Mul for GaMultivector {
     }
 }
 
-// the norm of a multivector |A|
-// \[|A|^2=\left< A\^dag A \right>_0\]
-impl GaMultivector {
-    pub fn Norm(self: Self) -> f32 {
-        let a = self;
-        let res = sqrtf((a.Reverse() * a)[0]);
-        res
-    }
-}
-
-// the inverse of a multivector A^-1
-// \[A^{-1}=\frac{A^\dag}{|A|^2}\]
-impl GaMultivector {
-    pub fn Inverse(self: Self) -> GaMultivector {
-        // TODO test if self is the zero multivector
-        let a = self;
-        a.Reverse() * (1.0 / (a.Reverse() * a)[0])
-    }
-}
-
 // Wedge
 // The outer product. (MEET)
 impl BitXor for GaMultivector {
@@ -331,7 +310,6 @@ impl Sub for GaMultivector {
     }
 }
 
-// smul
 // scalar/multivector multiplication
 impl Mul<GaMultivector> for f32 {
     type Output = GaMultivector;
@@ -351,7 +329,6 @@ impl Mul<GaMultivector> for f32 {
     }
 }
 
-// muls
 // multivector/scalar multiplication
 impl Mul<f32> for GaMultivector {
     type Output = GaMultivector;
@@ -371,7 +348,6 @@ impl Mul<f32> for GaMultivector {
     }
 }
 
-// sadd
 // scalar/multivector addition
 impl Add<GaMultivector> for f32 {
     type Output = GaMultivector;
@@ -391,7 +367,6 @@ impl Add<GaMultivector> for f32 {
     }
 }
 
-// adds
 // multivector/scalar addition
 impl Add<f32> for GaMultivector {
     type Output = GaMultivector;
@@ -411,37 +386,72 @@ impl Add<f32> for GaMultivector {
     }
 }
 
+// scalar/multivector subtraction
+impl Sub<GaMultivector> for f32 {
+    type Output = GaMultivector;
+
+    fn sub(self: f32, b: GaMultivector) -> GaMultivector {
+        let mut res = GaMultivector::zero();
+        let a = self;
+        res[0] = a - b[0];
+        res[1] = -b[1];
+        res[2] = -b[2];
+        res[3] = -b[3];
+        res[4] = -b[4];
+        res[5] = -b[5];
+        res[6] = -b[6];
+        res[7] = -b[7];
+        res
+    }
+}
+
+// multivector/scalar subtraction
+impl Sub<f32> for GaMultivector {
+    type Output = GaMultivector;
+
+    fn sub(self: GaMultivector, b: f32) -> GaMultivector {
+        let mut res = GaMultivector::zero();
+        let a = self;
+        res[0] = a[0] - b;
+        res[1] = a[1];
+        res[2] = a[2];
+        res[3] = a[3];
+        res[4] = a[4];
+        res[5] = a[5];
+        res[6] = a[6];
+        res[7] = a[7];
+        res
+    }
+}
+
+// the norm of a multivector |A|
+// \[|A|^2=\left< A\^dag A \right>_0\]
+impl GaMultivector {
+    pub fn Norm(self: Self) -> f32 {
+        let a = self;
+        let res = sqrtf((a.Reverse() * a)[0]);
+        res
+    }
+}
+
+// the inverse of a multivector A^-1
+// \[A^{-1}=\frac{A^\dag}{|A|^2}\]
+impl GaMultivector {
+    pub fn Inverse(self: Self) -> GaMultivector {
+        // TODO test if self is the zero multivector
+        let a = self;
+        a.Reverse() * (1.0 / (a.Reverse() * a)[0])
+    }
+}
+
 // new ga vector type
 
 impl GaMultivector {
-    pub fn new_vector(v1: f32, v2: f32, v3: f32) -> GaMultivector {
-        let mut res = GaMultivector::zero();
-        res[1] = v1;
-        res[2] = v2;
-        res[3] = v3;
-        res
-    }
-
     pub fn new_bivector(b1: f32, b2: f32, b3: f32) -> GaMultivector {
         let mut res = GaMultivector::zero();
         res[4] = b1;
         res[5] = b2;
         res[6] = b3;
-        res
-    }
-
-    // angle in radians and the 3 bivector componets
-    pub fn new_rotor(angle_radians: f32, b1: f32, b2: f32, b3: f32) -> GaMultivector {
-        // nomilize the bivector
-        let bivector_norm = sqrtf(powf(b1, 2.0) + powf(b2, 2.0) + powf(b3, 2.0));
-
-        // init mvec
-        let mut res = GaMultivector::zero();
-
-        res[0] = cosf(angle_radians / 2.0);
-        res[4] = sinf(angle_radians / 2.0) * b1 / bivector_norm;
-        res[5] = sinf(angle_radians / 2.0) * b2 / bivector_norm;
-        res[6] = sinf(angle_radians / 2.0) * b3 / bivector_norm;
         res
     }
 }
