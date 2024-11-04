@@ -48,47 +48,6 @@ impl IndexMut<usize> for GaVector {
     }
 }
 
-// impl defmt::Format for GaVector {
-//     fn format(&self, fmt: defmt::Formatter) -> defmt::Result {
-//         let t = internp!("{=f32}");
-//         defmt::export::istr(&t);
-//         defmt::export::GaVector(self)
-//         // on the wire: [1, 42]
-//         //  string index ^  ^^ `self`
-//     }
-// }
-
-// impl fmt::Display for GaVector {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         let mut n = 0;
-//         let ret = self
-//             .mvec
-//             .iter()
-//             .enumerate()
-//             .filter_map(|(i, &coeff)| {
-//                 if coeff > 0.00001 || coeff < -0.00001 {
-//                     n = 1;
-//                     Some(format!(
-//                         "{}{}",
-//                         format!("{:.*}", 7, coeff)
-//                             .trim_end_matches('0')
-//                             .trim_end_matches('.'),
-//                         if i > 0 { basis[i] } else { "" }
-//                     ))
-//                 } else {
-//                     None
-//                 }
-//             })
-//             .collect::<Vec<String>>()
-//             .join(" + ");
-//         if n == 0 {
-//             write!(f, "0")
-//         } else {
-//             write!(f, "{}", ret)
-//         }
-//     }
-// }
-
 // Reverse
 // \[ \vec{v}^\dag\]
 // Reverse the order of the basis blades.
@@ -119,7 +78,7 @@ mod vector_dual {
         let vector: GaVector = GaVector::new(1.0, 2.0, 3.0);
         let bivector: GaBivector = vector.Dual();
         assert_eq!(vector[1], bivector[6]);
-        assert_eq!(vector[2], -bivector[5]);
+        assert_eq!(vector[2], bivector[5]);
         assert_eq!(vector[3], bivector[4]);
     }
 }
@@ -154,15 +113,13 @@ impl GaVector {
 }
 
 // Mul
-// \[ \vec{u}\vec{v}\]
+// \[ \vec{u}\vec{v}= \vec{u}\cdot\vec{v}+\vec{u}\wedge\vec{v}\]
 // The geometric product.
 impl Mul for GaVector {
-    type Output = GaVector;
+    type Output = GaMultivector;
 
-    fn mul(self: GaVector, b: GaVector) -> GaVector {
-        super::geometric_algebra_vector::GaVector {
-            mvec: self.mvec * b.mvec,
-        }
+    fn mul(self: GaVector, b: GaVector) -> GaMultivector {
+        self.mvec * b.mvec
     }
 }
 
@@ -249,30 +206,25 @@ mod vector_wedge {
     use approx::assert_relative_eq;
     #[test]
     fn vector_vector_wedge() {
-        let vector1: GaVector = GaVector::new(3.0, 5.0, 4.0);
-        let vector2: GaVector = GaVector::new(2.0, 1.0, 6.0);
+        // 3e1+5e2+4e3
+        let vector1 = GaVector::new(3.0, 5.0, 4.0);
+        // 2e1+1e2+6e3
+        let vector2 = GaVector::new(2.0, 1.0, 6.0);
         let bivector = vector1 ^ vector2;
+        // −7e12​-10e31​+26e23
         assert_relative_eq!(bivector[4], -7.0, max_relative = 0.000001);
-        assert_relative_eq!(bivector[5], 10.0, max_relative = 0.000001);
+        assert_relative_eq!(bivector[5], -10.0, max_relative = 0.000001);
         assert_relative_eq!(bivector[6], 26.0, max_relative = 0.000001);
     }
-
-    // #[test]
-    // fn vector_mvec_wedge() {}
-
-    // #[test]
-    // fn mvec_vector_wedge() {}
 }
 
 // Vee
 // The regressive product. (JOIN)
 impl BitAnd for GaVector {
-    type Output = GaVector;
+    type Output = GaMultivector;
 
-    fn bitand(self: GaVector, b: GaVector) -> GaVector {
-        super::geometric_algebra_vector::GaVector {
-            mvec: self.mvec & b.mvec,
-        }
+    fn bitand(self: GaVector, b: GaVector) -> GaMultivector {
+        self.mvec & b.mvec
     }
 }
 
@@ -313,17 +265,13 @@ mod vector_dot {
     use approx::assert_relative_eq;
     #[test]
     fn vector_vector_dot() {
+        // 3e1+5e2+4e3
         let vector1: GaVector = GaVector::new(3.0, 5.0, 4.0);
+        // 2e1+1e2+6e3
         let vector2: GaVector = GaVector::new(2.0, 1.0, 6.0);
         let scalar = vector1 | vector2;
         assert_relative_eq!(scalar, 35.0, max_relative = 0.000001);
     }
-
-    // #[test]
-    // fn vector_mvec_wedge() {}
-
-    // #[test]
-    // fn mvec_vector_wedge() {}
 }
 
 // Add
@@ -340,23 +288,19 @@ impl Add for GaVector {
 
 // scalar/vector addition
 impl Add<GaVector> for f32 {
-    type Output = GaVector;
+    type Output = GaMultivector;
 
-    fn add(self: f32, b: GaVector) -> GaVector {
-        super::geometric_algebra_vector::GaVector {
-            mvec: self + b.mvec,
-        }
+    fn add(self: f32, b: GaVector) -> GaMultivector {
+        self + b.mvec
     }
 }
 
 // vector/scalar addition
 impl Add<f32> for GaVector {
-    type Output = GaVector;
+    type Output = GaMultivector;
 
-    fn add(self: GaVector, b: f32) -> GaVector {
-        super::geometric_algebra_vector::GaVector {
-            mvec: self.mvec + b,
-        }
+    fn add(self: GaVector, b: f32) -> GaMultivector {
+        self.mvec + b
     }
 }
 
@@ -392,23 +336,19 @@ impl Sub for GaVector {
 
 // scalar/vector subtraction
 impl Sub<GaVector> for f32 {
-    type Output = GaVector;
+    type Output = GaMultivector;
 
-    fn sub(self: f32, b: GaVector) -> GaVector {
-        super::geometric_algebra_vector::GaVector {
-            mvec: self - b.mvec,
-        }
+    fn sub(self: f32, b: GaVector) -> GaMultivector {
+        self - b.mvec
     }
 }
 
 // vector/scalar subtraction
 impl Sub<f32> for GaVector {
-    type Output = GaVector;
+    type Output = GaMultivector;
 
-    fn sub(self: GaVector, b: f32) -> GaVector {
-        super::geometric_algebra_vector::GaVector {
-            mvec: self.mvec - b,
-        }
+    fn sub(self: GaVector, b: f32) -> GaMultivector {
+        self.mvec - b
     }
 }
 

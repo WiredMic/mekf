@@ -23,10 +23,10 @@ impl GaBivector {
         }
     }
 
-    pub fn new(e1e2: f32, e1e3: f32, e2e3: f32) -> Self {
+    pub fn new(e1e2: f32, e3e1: f32, e2e3: f32) -> Self {
         let mut ret = Self::zero();
         ret.mvec[4] = e1e2;
-        ret.mvec[5] = e1e3;
+        ret.mvec[5] = e3e1;
         ret.mvec[6] = e2e3;
         ret
     }
@@ -100,13 +100,13 @@ impl GaBivector {
 }
 
 // Mul
-// \[ \vec{B}\vec{C} = \left<\vec{B}\vec{C}\right>_{2-2} \]
+// \[ \vec{B}\vec{C} \]
 // The geometric product.
 impl Mul for GaBivector {
-    type Output = f32;
+    type Output = GaMultivector;
 
-    fn mul(self: GaBivector, b: GaBivector) -> f32 {
-        (self.mvec * b.mvec)[0]
+    fn mul(self: GaBivector, b: GaBivector) -> GaMultivector {
+        self.mvec * b.mvec
     }
 }
 
@@ -174,17 +174,17 @@ mod bivector_mul {
     use approx::assert_relative_eq;
     #[test]
     fn bivector_bivector_mul() {
+        // 3e12+5e31+4e23
         let bivector1 = GaBivector::new(3.0, 5.0, 4.0);
+        // 2e12+e31+6e23
         let bivector2 = GaBivector::new(2.0, 1.0, 6.0);
-        let scalar = bivector1 * bivector2;
-        assert_relative_eq!(scalar, -35.0, max_relative = 0.000001);
+        let mvec = bivector1 * bivector2;
+        // −35+26e12​-10e31​−7e23​
+        assert_relative_eq!(mvec[0], -35.0, max_relative = 0.000001);
+        assert_relative_eq!(mvec[4], 26.0, max_relative = 0.000001);
+        assert_relative_eq!(mvec[5], -10.0, max_relative = 0.000001);
+        assert_relative_eq!(mvec[6], -7.0, max_relative = 0.000001);
     }
-
-    // #[test]
-    // fn vector_mvec_wedge() {}
-
-    // #[test]
-    // fn mvec_vector_wedge() {}
 }
 
 // Wedge
@@ -225,8 +225,8 @@ impl BitXor<GaBivector> for GaMultivector {
     }
 }
 
-// bivector/bivector wedge
-// \[ \vec{B}\wedge \vec{v} \]
+// bivector/vector wedge
+// \[ \vec{B}\wedge \vec{v} = t e123\]
 impl BitXor<GaVector> for GaBivector {
     type Output = GaMultivector;
 
@@ -236,7 +236,7 @@ impl BitXor<GaVector> for GaBivector {
 }
 
 // vector/bivector wedge
-// \[ \vec{v} \wedge \vec{B} \]
+// \[ \vec{v} \wedge \vec{B} = te123\]
 impl BitXor<GaBivector> for GaVector {
     type Output = GaMultivector;
 
@@ -251,14 +251,14 @@ mod bivector_wedge {
     use approx::assert_relative_eq;
     #[test]
     fn bivector_vector_wedge() {
+        // 3e1+5e2+4e3
         let bivector = GaBivector::new(3.0, 5.0, 4.0);
+        // 2e12+e31+6e23
         let vector = GaVector::new(2.0, 1.0, 6.0);
+        // 31e123​
         let trivector = bivector ^ vector;
-        assert_relative_eq!(trivector[7], 21.0, max_relative = 0.000001);
+        assert_relative_eq!(trivector[7], 31.0, max_relative = 0.000001);
     }
-
-    // #[test]
-    // fn vector_bivector_wedge() {}
 }
 
 // Vee
@@ -279,6 +279,7 @@ impl BitOr for GaBivector {
     type Output = f32;
 
     fn bitor(self: GaBivector, b: GaBivector) -> f32 {
+        // -self[4] * self[4] - self[5] * self[5] - self[6] * self[6]
         (self.mvec | b.mvec)[0]
     }
 }
@@ -322,7 +323,7 @@ impl BitOr<GaBivector> for GaVector {
 
     fn bitor(self: GaVector, b: GaBivector) -> GaVector {
         super::geometric_algebra_vector::GaVector {
-            mvec: self ^ b.mvec,
+            mvec: self | b.mvec,
         }
     }
 }
@@ -333,25 +334,39 @@ mod bivector_dot {
     use approx::assert_relative_eq;
     #[test]
     fn bivector_bivector_dot() {
+        // 3e12+5e31+4e23
         let bivector1 = GaBivector::new(3.0, 5.0, 4.0);
+        // 2e12+e31+6e23
         let bivector2 = GaBivector::new(2.0, 1.0, 6.0);
-        let scalarMul = bivector1 * bivector2;
-        let scalarDot = bivector1 | bivector2;
-        assert_relative_eq!(scalarMul, scalarDot, max_relative = 0.000001);
+        let scalar = bivector1 | bivector2;
+        assert_relative_eq!(scalar, -35.0, max_relative = 0.000001);
     }
 
     #[test]
     fn bivector_vector_dot() {
+        // 3e12+5e31+4e23
         let bivector = GaBivector::new(3.0, 5.0, 4.0);
+        // 2e1+e2+6e3
         let vector = GaVector::new(2.0, 1.0, 6.0);
         let vectorRes = bivector | vector;
-        assert_relative_eq!(vectorRes[1], 33.0, max_relative = 0.000001);
+        // -27e1​+18e2​+6e3
+        assert_relative_eq!(vectorRes[1], -27.0, max_relative = 0.000001);
         assert_relative_eq!(vectorRes[2], 18.0, max_relative = 0.000001);
-        assert_relative_eq!(vectorRes[3], -14.0, max_relative = 0.000001);
+        assert_relative_eq!(vectorRes[3], 6.0, max_relative = 0.000001);
     }
 
-    // #[test]
-    // fn vector_bivector_wedge() {}
+    #[test]
+    fn vector_bivector_dot() {
+        // 2e1+e2+6e3
+        let vector = GaVector::new(2.0, 1.0, 6.0);
+        // 3e12+5e31+4e23
+        let bivector = GaBivector::new(3.0, 5.0, 4.0);
+        let vectorRes = vector | bivector;
+        // 27e1​-18e2​-6e3
+        assert_relative_eq!(vectorRes[1], 27.0, max_relative = 0.000001);
+        assert_relative_eq!(vectorRes[2], -18.0, max_relative = 0.000001);
+        assert_relative_eq!(vectorRes[3], -6.0, max_relative = 0.000001);
+    }
 }
 
 // Add
@@ -366,37 +381,21 @@ impl Add for GaBivector {
     }
 }
 
-// Sub
-// Vector subtraction
-impl Sub for GaBivector {
-    type Output = GaBivector;
-
-    fn sub(self: GaBivector, b: GaBivector) -> GaBivector {
-        super::geometric_algebra_bivector::GaBivector {
-            mvec: self.mvec - b.mvec,
-        }
-    }
-}
-
 // scalar/bivector addition
 impl Add<GaBivector> for f32 {
-    type Output = GaBivector;
+    type Output = GaMultivector;
 
-    fn add(self: f32, b: GaBivector) -> GaBivector {
-        super::geometric_algebra_bivector::GaBivector {
-            mvec: self + b.mvec,
-        }
+    fn add(self: f32, b: GaBivector) -> GaMultivector {
+        self + b.mvec
     }
 }
 
 // bivector/scalar addition
 impl Add<f32> for GaBivector {
-    type Output = GaBivector;
+    type Output = GaMultivector;
 
-    fn add(self: GaBivector, b: f32) -> GaBivector {
-        super::geometric_algebra_bivector::GaBivector {
-            mvec: self.mvec + b,
-        }
+    fn add(self: GaBivector, b: f32) -> GaMultivector {
+        self.mvec + b
     }
 }
 
@@ -423,7 +422,7 @@ impl Add<GaVector> for GaBivector {
     type Output = GaMultivector;
 
     fn add(self: GaBivector, b: GaVector) -> GaMultivector {
-        self.mvec * b
+        self.mvec + b
     }
 }
 
@@ -432,33 +431,41 @@ impl Add<GaBivector> for GaVector {
     type Output = GaMultivector;
 
     fn add(self: GaVector, b: GaBivector) -> GaMultivector {
-        self * b.mvec
+        self + b.mvec
+    }
+}
+
+// Sub
+// Vector subtraction
+impl Sub for GaBivector {
+    type Output = GaBivector;
+
+    fn sub(self: GaBivector, b: GaBivector) -> GaBivector {
+        super::geometric_algebra_bivector::GaBivector {
+            mvec: self.mvec - b.mvec,
+        }
     }
 }
 
 // scalar/bivector addition
 impl Sub<GaBivector> for f32 {
-    type Output = GaBivector;
+    type Output = GaMultivector;
 
-    fn sub(self: f32, b: GaBivector) -> GaBivector {
-        super::geometric_algebra_bivector::GaBivector {
-            mvec: self - b.mvec,
-        }
+    fn sub(self: f32, b: GaBivector) -> GaMultivector {
+        self - b.mvec
     }
 }
 
 // bivector/scalar subtraction
 impl Sub<f32> for GaBivector {
-    type Output = GaBivector;
+    type Output = GaMultivector;
 
-    fn sub(self: GaBivector, b: f32) -> GaBivector {
-        super::geometric_algebra_bivector::GaBivector {
-            mvec: self.mvec - b,
-        }
+    fn sub(self: GaBivector, b: f32) -> GaMultivector {
+        self.mvec - b
     }
 }
 
-// multivector/vector subtraction
+// multivector/bivector subtraction
 impl Sub<GaBivector> for GaMultivector {
     type Output = GaMultivector;
 
@@ -467,7 +474,7 @@ impl Sub<GaBivector> for GaMultivector {
     }
 }
 
-// vector/multivector subtraction
+// bivector/multivector subtraction
 impl Sub<GaMultivector> for GaBivector {
     type Output = GaMultivector;
 
@@ -481,7 +488,7 @@ impl Sub<GaVector> for GaBivector {
     type Output = GaMultivector;
 
     fn sub(self: GaBivector, b: GaVector) -> GaMultivector {
-        self.mvec * b
+        self.mvec - b
     }
 }
 
@@ -490,7 +497,7 @@ impl Sub<GaBivector> for GaVector {
     type Output = GaMultivector;
 
     fn sub(self: GaVector, b: GaBivector) -> GaMultivector {
-        self * b.mvec
+        self - b.mvec
     }
 }
 
