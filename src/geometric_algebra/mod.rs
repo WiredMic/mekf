@@ -18,9 +18,12 @@ pub mod rotations {
         let rotor = rotor * (1.0 / rotor.Norm());
         let norm = vector.Norm();
 
-        super::geometric_algebra_vector::GaVector {
-            mvec: (rotor.Reverse() * vector * rotor) * (1.0 / norm) * norm,
-        }
+        let mut vector_rot = super::geometric_algebra_vector::GaVector {
+            mvec: (rotor.Reverse() * vector * rotor),
+        };
+        vector_rot = vector_rot * (1.0 / norm) * norm;
+        // vector_rot[7] = 0.0;
+        vector_rot
     }
 
     #[cfg(test)]

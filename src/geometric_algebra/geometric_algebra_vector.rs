@@ -5,15 +5,13 @@
 // #![feature(const_slice_len)]
 
 use core::ops::{Add, BitAnd, BitOr, BitXor, Div, Index, IndexMut, Mul, Not, Sub};
-extern crate defmt;
-use defmt::Format;
 use libm::{cosf, powf, sinf, sqrtf};
 
 use super::geometric_algebra_bivector::GaBivector;
 use super::geometric_algebra_multivector::basis_count;
 use super::geometric_algebra_multivector::GaMultivector;
 
-#[derive(Default, Debug, Clone, Copy, PartialEq, Format)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct GaVector {
     pub mvec: GaMultivector,
 }

@@ -8,17 +8,15 @@
 #![allow(non_snake_case)]
 // #![feature(const_slice_len)]
 
+use core::f32::consts::PI;
 use core::ops::{Add, BitAnd, BitOr, BitXor, Div, Index, IndexMut, Mul, Not, Sub};
 use libm::{cosf, powf, sinf, sqrtf};
-extern crate defmt;
-use core::f32::consts::PI;
-use defmt::Format;
 
 // the 8 bases of 3D vectorspace geometric algebra
 const basis: &'static [&'static str] = &["1", "e1", "e2", "e3", "e12", "e31", "e23", "e123"];
 pub const basis_count: usize = basis.len();
 
-#[derive(Default, Debug, Clone, Copy, PartialEq, Format)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct GaMultivector {
     mvec: [f32; basis_count],
 }

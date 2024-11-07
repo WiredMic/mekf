@@ -194,8 +194,10 @@ impl Mul for GaRotor {
     type Output = GaRotor;
 
     fn mul(self: GaRotor, b: GaRotor) -> GaRotor {
+        let rotor = self.mvec * b.mvec;
+
         super::geometric_algebra_rotor::GaRotor {
-            mvec: self.mvec * b.mvec,
+            mvec: rotor * (1.0 / rotor.Norm()),
         }
     }
 }
